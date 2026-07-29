@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect } from 'react';
-import { X, Users, Mail, UserCircle, MessageSquare, Plus, Settings, LogOut, Gift, Gift } from 'lucide-react';
+import { X, Users, Mail, UserCircle, MessageSquare, Plus, Settings, LogOut, Gift } from 'lucide-react';
 import { LanguageSelector } from '@/src/components/ui/side-nav/language-selector';
 import ThemeToggle from '@/src/components/ui/theme-toggle';
 import NavCountBubble from '@/src/components/ui/nav-count-bubble';
