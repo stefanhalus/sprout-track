@@ -2,10 +2,13 @@ import React, { useEffect, useState, useRef, Suspense } from 'react';
 import ChangelogModal from '@/src/components/modals/changelog';
 import FeedbackPage from '@/src/components/forms/FeedbackForm/FeedbackPage';
 import dynamic from 'next/dynamic';
-import { X, Settings, LogOut, MessageSquare, CreditCard, Clock, Loader2, PlusSquare, History, Calendar, BarChart3, Baby, ChevronLeft, ChevronRight } from 'lucide-react';
+import { X, Settings, LogOut, MessageSquare, CreditCard, Clock, Loader2, ExternalLink, PlusSquare, History, Calendar, BarChart3, Baby, ChevronLeft, ChevronRight } from 'lucide-react';
 import NavCountBubble from '@/src/components/ui/nav-count-bubble';
 import { Badge } from '@/src/components/ui/badge';
 import { LanguageSelector } from './language-selector';
+import { isNativeApp } from '@/src/utils/native-app';
+import { openExternal, MANAGE_SUBSCRIPTION_URL } from '@/src/utils/external-link';
+import { sideNavFooterButtons, trialCtaMode } from '@/src/utils/shell-chrome';
 
 // Loading fallback is a component so it can use the localization hook
 const PaymentModalLoading = () => {
@@ -178,6 +181,7 @@ export const SideNav: React.FC<SideNavProps> = ({
   nonModal = false,
   familySlug,
   familyName,
+  onSwitchFamily,
   isCollapsed = false,
   onToggleCollapse,
 }) => {
@@ -194,10 +198,15 @@ export const SideNav: React.FC<SideNavProps> = ({
   const [unreadFeedbackCount, setUnreadFeedbackCount] = useState<number>(0);
   const [hasNewUpdates, setHasNewUpdates] = useState<boolean>(false);
   const [photosEnabled, setPhotosEnabled] = useState<boolean>(false);
+  const [inShell, setInShell] = useState<boolean>(false);
   const returnFocusRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     fetchPhotosEnabled().then(setPhotosEnabled);
+  }, []);
+
+  useEffect(() => {
+    setInShell(isNativeApp());
   }, []);
 
   // Restore focus to the element that opened the nav when it closes (modal mode)
@@ -569,14 +578,26 @@ export const SideNav: React.FC<SideNavProps> = ({
                           {t('Ending')}: {formatDateLong(new Date(accountStatus.trialEnds), dateFormat)}
                         </p>
                       </div>
+                    {trialCtaMode(inShell) === 'external' ? (
                       <Button
                         size="sm"
-                        className="w-full bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white"
-                        onClick={() => setShowPaymentModal(true)}
+                        className="w-full"
+                        variant="outline"
+                        onClick={() => openExternal(MANAGE_SUBSCRIPTION_URL)}
                       >
-                        <CreditCard className="h-3 w-3 mr-1" aria-hidden="true" />
-                        {t('Buy Now')}
+                        <ExternalLink className="h-3 w-3 mr-1" aria-hidden="true" />
+                        {t('Manage your subscription at sprout-track.com')}
                       </Button>
+                    ) : (
+                        <Button
+                          size="sm"
+                          className="w-full bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white"
+                          onClick={() => setShowPaymentModal(true)}
+                        >
+                          <CreditCard className="h-3 w-3 mr-1" aria-hidden="true" />
+                          {t('Buy Now')}
+                        </Button>
+                    )}
                     </div>
                   </div>
                 )}
@@ -615,8 +636,8 @@ export const SideNav: React.FC<SideNavProps> = ({
         />
       )}
 
-      {/* Payment Modal - only shown in SaaS mode */}
-      {isSaasMode && isAccountAuth && accountStatus && (
+      {/* Payment Modal - only shown in SaaS mode, never mounted in-shell (IAP compliance) */}
+      {!inShell && isSaasMode && isAccountAuth && accountStatus && (
         <PaymentModal
           isOpen={showPaymentModal}
           onClose={() => setShowPaymentModal(false)}
@@ -657,26 +678,19 @@ export const SideNav: React.FC<SideNavProps> = ({
         />
       )}
 
-      {/* Footer with Theme Toggle, Settings and Logout */}
-      <div className={cn(sideNavStyles.footer, "side-nav-footer", isCollapsed && "px-2")}>
-        {/* Theme Toggle Component */}
-        <ThemeToggle className="mb-2" isCollapsed={isCollapsed} />
-
-        {/* Settings Button */}
-        <FooterButton
-          icon={<Settings aria-hidden="true" />}
-          label={t('Settings')}
-          onClick={onSettingsClick}
-          isCollapsed={isCollapsed}
-        />
-
-        {/* Logout Button */}
-        <FooterButton
-          icon={<LogOut aria-hidden="true" />}
-          label={t('Logout')}
-          onClick={onLogout}
-          isCollapsed={isCollapsed}
-        />
+        {/* Footer with Theme Toggle, Settings and Logout / shell Exit */}
+        <div className={cn(sideNavStyles.footer, "side-nav-footer")}>
+          <ThemeToggle className="mb-2" />
+          {sideNavFooterButtons(inShell).map((btn) =>
+            btn === 'settings' ? (
+              <FooterButton key={btn} icon={<Settings aria-hidden="true" />} label={t('Settings')} onClick={onSettingsClick} />
+            ) : btn === 'logout' ? (
+              <FooterButton key={btn} icon={<LogOut aria-hidden="true" />} label={t('Logout')} onClick={onLogout} />
+            ) : (
+              <FooterButton key={btn} icon={<LogOut aria-hidden="true" />} label={t('Exit to My Families')} onClick={onSwitchFamily ?? onLogout} />
+            )
+          )}
+        </div>
       </div>
     </>
   );
