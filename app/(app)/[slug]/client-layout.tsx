@@ -95,6 +95,7 @@ function AppContent({ children }: { children: React.ReactNode }) {
     // Only run this on client-side
     if (typeof window !== 'undefined') {
       consumeInjectedSession(); // shell-handed session (native app): writes authToken/unlockTime, strips the fragment
+      consumeInjectedSession(); // shell-handed session (native app): writes authToken/unlockTime, strips the fragment
       const unlockTime = localStorage.getItem('unlockTime');
       if (unlockTime && Date.now() - parseInt(unlockTime) <= 60 * 1000) {
         return true;
@@ -139,6 +140,16 @@ function AppContent({ children }: { children: React.ReactNode }) {
       now: Date.now(),
     });
   });
+
+  useEffect(() => {
+    if (relockDecision !== 'return-to-shell') return;
+    writeReauthMarker(localStorage, { slug: familySlug, at: Date.now() });
+    navigateToShell({ type: 'sessionExpired' });
+  }, [relockDecision, familySlug]);
+
+  useEffect(() => {
+    if (isUnlocked) clearReauthMarker(localStorage);
+  }, [isUnlocked]);
 
   useEffect(() => {
     if (relockDecision !== 'return-to-shell') return;
@@ -414,6 +425,7 @@ function AppContent({ children }: { children: React.ReactNode }) {
 
     // Account holders go to the home page with the login modal open,
     // PIN users go to family root (which shows login UI)
+    if (navigateToShell({ type: 'loggedOut', reason })) return;
     if (navigateToShell({ type: 'loggedOut', reason })) return;
     router.push(logoutDestination({ isAccountAuth, familySlug, reason }));
   };
@@ -758,7 +770,7 @@ function AppContent({ children }: { children: React.ReactNode }) {
       // users need unlockTime. Shared with the native relock gate above so the
       // two can't drift apart again.
       setIsUnlocked(isSessionUnlocked({ authToken, unlockTime }));
-
+      
       // Extract user information from JWT token
       if (authToken) {
         try {

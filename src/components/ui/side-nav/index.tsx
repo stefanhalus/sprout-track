@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef, Suspense } from 'react';
 import ChangelogModal from '@/src/components/modals/changelog';
 import FeedbackPage from '@/src/components/forms/FeedbackForm/FeedbackPage';
 import dynamic from 'next/dynamic';
-import { X, Settings, LogOut, MessageSquare, CreditCard, Clock, Loader2, ExternalLink, PlusSquare, History, Calendar, BarChart3, Baby, ChevronLeft, ChevronRight } from 'lucide-react';
+import { X, Settings, LogOut, MessageSquare, CreditCard, Clock, Loader2, ExternalLink, ChevronRight, ChevronLeft, PlusSquare, Calendar, Baby, BarChart3, History } from 'lucide-react';
 import NavCountBubble from '@/src/components/ui/nav-count-bubble';
 import { Badge } from '@/src/components/ui/badge';
 import { LanguageSelector } from './language-selector';
@@ -478,15 +478,15 @@ export const SideNav: React.FC<SideNavProps> = ({
           className="side-nav-item"
           isCollapsed={isCollapsed}
         />
-          {photosEnabled && (
-            <SideNavItem
-              path="/photos"
-              label={t('Photos')}
-              isActive={currentPath === '/photos'}
-              onClick={onNavigate}
-              className="side-nav-item"
-            />
-          )}
+        {photosEnabled && (
+          <SideNavItem
+            path="/photos"
+            label={t('Photos')}
+            isActive={currentPath === '/photos'}
+            onClick={onNavigate}
+            className="side-nav-item"
+          />
+        )}
         <SideNavItem
           path="/reports"
           label={t('Reports')}
@@ -578,17 +578,17 @@ export const SideNav: React.FC<SideNavProps> = ({
                           {t('Ending')}: {formatDateLong(new Date(accountStatus.trialEnds), dateFormat)}
                         </p>
                       </div>
-                    {trialCtaMode(inShell) === 'external' ? (
-                      <Button
-                        size="sm"
-                        className="w-full"
-                        variant="outline"
-                        onClick={() => openExternal(MANAGE_SUBSCRIPTION_URL)}
-                      >
-                        <ExternalLink className="h-3 w-3 mr-1" aria-hidden="true" />
-                        {t('Manage your subscription at sprout-track.com')}
-                      </Button>
-                    ) : (
+                      {trialCtaMode(inShell) === 'external' ? (
+                        <Button
+                          size="sm"
+                          className="w-full"
+                          variant="outline"
+                          onClick={() => openExternal(MANAGE_SUBSCRIPTION_URL)}
+                        >
+                          <ExternalLink className="h-3 w-3 mr-1" aria-hidden="true" />
+                          {t('Manage your subscription at sprout-track.com')}
+                        </Button>
+                      ) : (
                         <Button
                           size="sm"
                           className="w-full bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white"
@@ -597,7 +597,7 @@ export const SideNav: React.FC<SideNavProps> = ({
                           <CreditCard className="h-3 w-3 mr-1" aria-hidden="true" />
                           {t('Buy Now')}
                         </Button>
-                    )}
+                      )}
                     </div>
                   </div>
                 )}
@@ -652,7 +652,7 @@ export const SideNav: React.FC<SideNavProps> = ({
           onPaymentSuccess={() => {
             setShowPaymentModal(false);
             // Refresh account status after successful payment
-            const refreshAccountStatus = async () => {
+            const fetchAccountStatus = async () => {
               const authToken = localStorage.getItem('authToken');
               if (!authToken) return;
 
@@ -673,24 +673,23 @@ export const SideNav: React.FC<SideNavProps> = ({
                 console.error('Error refreshing account status:', error);
               }
             };
-            refreshAccountStatus();
+            fetchAccountStatus();
           }}
         />
       )}
 
-        {/* Footer with Theme Toggle, Settings and Logout / shell Exit */}
-        <div className={cn(sideNavStyles.footer, "side-nav-footer")}>
-          <ThemeToggle className="mb-2" />
-          {sideNavFooterButtons(inShell).map((btn) =>
-            btn === 'settings' ? (
-              <FooterButton key={btn} icon={<Settings aria-hidden="true" />} label={t('Settings')} onClick={onSettingsClick} />
-            ) : btn === 'logout' ? (
-              <FooterButton key={btn} icon={<LogOut aria-hidden="true" />} label={t('Logout')} onClick={onLogout} />
-            ) : (
-              <FooterButton key={btn} icon={<LogOut aria-hidden="true" />} label={t('Exit to My Families')} onClick={onSwitchFamily ?? onLogout} />
-            )
-          )}
-        </div>
+      {/* Footer with Theme Toggle, Settings and Logout / shell Exit */}
+      <div className={cn(sideNavStyles.footer, "side-nav-footer")}>
+        <ThemeToggle className="mb-2" />
+        {sideNavFooterButtons(inShell).map((btn) =>
+          btn === 'settings' ? (
+            <FooterButton key={btn} icon={<Settings aria-hidden="true" />} label={t('Settings')} onClick={onSettingsClick} />
+          ) : btn === 'logout' ? (
+            <FooterButton key={btn} icon={<LogOut aria-hidden="true" />} label={t('Logout')} onClick={onLogout} />
+          ) : (
+            <FooterButton key={btn} icon={<LogOut aria-hidden="true" />} label={t('Exit to My Families')} onClick={onSwitchFamily ?? onLogout} />
+          )
+        )}
       </div>
     </>
   );
