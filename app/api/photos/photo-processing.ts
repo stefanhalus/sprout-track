@@ -1,4 +1,4 @@
-import sharp from 'sharp';
+import sharp, { Sharp } from 'sharp';
 import exifReader from 'exif-reader';
 import { PHOTO_DISPLAY_MAX_DIMENSION, PHOTO_THUMBNAIL_DIMENSION } from '@/src/utils/photoUtils';
 
