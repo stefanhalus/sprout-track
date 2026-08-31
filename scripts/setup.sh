@@ -84,7 +84,7 @@ fi
 echo "  - Main Prisma client generated successfully."
 
 echo "  - Generating log Prisma client..."
-npx prisma generate --schema=prisma/log-schema.prisma
+npx prisma generate --config prisma/log.config.ts
 if [ $? -ne 0 ]; then
     echo "Error: Log Prisma client generation failed! Setup aborted."
     exit 1
@@ -102,7 +102,7 @@ echo "Step 5: Running database migrations..."
 
 if [ "$DB_PROVIDER" = "postgresql" ]; then
     echo "  - Pushing main database schema to PostgreSQL..."
-    npx prisma db push --accept-data-loss --skip-generate
+    npx prisma db push --accept-data-loss
     if [ $? -ne 0 ]; then
         echo "Error: PostgreSQL schema push failed! Setup aborted."
         exit 1
@@ -110,7 +110,7 @@ if [ "$DB_PROVIDER" = "postgresql" ]; then
     echo "  - Main database schema pushed successfully."
 
     echo "  - Pushing log database schema to PostgreSQL..."
-    npx prisma db push --schema=prisma/log-schema.prisma --accept-data-loss --skip-generate
+    npx prisma db push --config prisma/log.config.ts --accept-data-loss
     if [ $? -ne 0 ]; then
         echo "Error: Log database schema push failed! Setup aborted."
         exit 1
@@ -126,7 +126,7 @@ else
     echo "  - Main database migrations deployed successfully."
 
     echo "  - Creating log database schema..."
-    npx prisma db push --schema=prisma/log-schema.prisma --accept-data-loss
+    npx prisma db push --config prisma/log.config.ts --accept-data-loss
     if [ $? -ne 0 ]; then
         echo "Error: Log database creation failed! Setup aborted."
         exit 1
@@ -144,6 +144,10 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 echo "Database seeded successfully with default family, system caretaker (PIN: 111222), and units."
+
+# Step 6a: Convert legacy Prisma 6 integer DateTimes to Prisma 7 text (idempotent, SQLite only)
+echo "Converting legacy SQLite datetime values..."
+node scripts/convert-sqlite-datetimes.js
 
 # Step 6b: Convert legacy solids feeds to food logs (idempotent, safe to rerun)
 echo "Converting legacy solids feeds to food logs..."

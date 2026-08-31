@@ -32,7 +32,7 @@ async function handler(request: NextRequest): Promise<NextResponse<ApiResponse<a
     if (isPostgreSQL()) {
       // PostgreSQL: use db push to sync schema (no SQLite migration files)
       try {
-        await execAsync('npx prisma db push --accept-data-loss --skip-generate', { cwd: projectRoot });
+        await execAsync('npx prisma db push --accept-data-loss', { cwd: projectRoot });
         console.log('✓ PostgreSQL schema push completed successfully');
       } catch (error) {
         console.error('✗ PostgreSQL schema push failed:', error);
@@ -54,6 +54,21 @@ async function handler(request: NextRequest): Promise<NextResponse<ApiResponse<a
           console.error('✗ Development migration also failed:', devError);
           throw new Error('Failed to run database migrations. Database schema may be incompatible.');
         }
+      }
+    }
+
+    // Step 2b: Convert legacy Prisma 6 integer DateTimes to Prisma 7 text (SQLite only —
+    // a restored backup may predate the upgrade; without this its rows are invisible
+    // to every date-range query)
+    if (!isPostgreSQL()) {
+      console.log('Step 2b: Converting legacy SQLite datetime values...');
+      try {
+        const datetimeScript = path.join(scriptsDir, 'convert-sqlite-datetimes.js');
+        const { stdout } = await execAsync(`node "${datetimeScript}"`, { cwd: projectRoot });
+        console.log(stdout.trim());
+      } catch (error) {
+        console.error('⚠ SQLite datetime conversion failed:', error);
+        console.warn('Datetime conversion skipped - it will retry on next startup');
       }
     }
 

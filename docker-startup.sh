@@ -107,18 +107,22 @@ if [ "$DB_PROVIDER" = "postgresql" ]; then
   fi
 
   echo "Pushing database schema to PostgreSQL..."
-  npx prisma db push --accept-data-loss --skip-generate
+  npx prisma db push --accept-data-loss
 
   echo "Pushing log database schema to PostgreSQL..."
-  npx prisma db push --schema=prisma/log-schema.prisma --accept-data-loss --skip-generate
+  npx prisma db push --config prisma/log.config.ts --accept-data-loss
 else
   # SQLite: use migration deploy (existing behavior)
   echo "Running database migrations..."
   npx prisma migrate deploy
 
   echo "Creating log database schema..."
-  npx prisma db push --schema=prisma/log-schema.prisma --accept-data-loss --skip-generate
+  npx prisma db push --config prisma/log.config.ts --accept-data-loss
 fi
+
+echo "Converting legacy SQLite datetime values..."
+# Idempotent: Prisma 6 stored DateTimes as integer ms, Prisma 7's adapter uses text
+node scripts/convert-sqlite-datetimes.js
 
 echo "Seeding database..."
 # Seed script has built-in checks for all entities (families, caretakers, settings, units)

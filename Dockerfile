@@ -23,6 +23,7 @@ COPY package.json package-lock.json ./
 
 # Copy prisma files first
 COPY prisma ./prisma/
+COPY prisma.config.ts ./
 
 # Copy the prisma-provider script (needed before prisma generate)
 COPY scripts/prisma-provider.js ./scripts/
@@ -74,7 +75,7 @@ RUN mkdir -p /app/env && \
     echo "AUTH_LIFE=86400" >> /app/env/.env && \
     echo "REFRESH_TOKEN_LIFE=604800" >> /app/env/.env && \
     echo "IDLE_TIME=604800" >> /app/env/.env && \
-    echo "APP_VERSION=1.6.5" >> /app/env/.env && \
+    echo "APP_VERSION=1.6.7" >> /app/env/.env && \
     echo "COOKIE_SECURE=false" >> /app/env/.env && \
     echo "ENABLE_NOTIFICATIONS=true" >> /app/env/.env && \
     echo "Base .env file created (ENC_HASH and JWT_SECRET are generated at startup)" && \

@@ -593,9 +593,6 @@ function HomeContent(): React.ReactElement {
             initialDate={initialTimelineDate}
             feedTimerTypes={selectedBaby.feedTimerTypes}
             onLatestStatusReady={handleLatestStatusReady}
-            onActivityDeleted={() => {
-              triggerRefresh();
-            }}
           />
         </Card>
       )}

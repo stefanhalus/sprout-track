@@ -1,5 +1,32 @@
 # Sprout Track Changelog
 
+## v1.6.7 - Postgres recovery and first party SaaS analytics
+
+### Changes
+
+#### Postgres
+
+- Fixed PostgreSQL crashing on startup (one image now serves both SQLite and PostgreSQL).
+- Fixed backup restore failing on PostgreSQL during the migration step.
+
+#### SaaS Analytics
+
+- Added first party non-invasive analytics to the Sprout Track home page
+- Added short-links with link usage analytics
+
+## v1.6.6 - Security Patches and Package Updates
+
+### Changes
+
+#### Patches
+- Upgraded all package handles due to CSV vulnerabilities found in Next and Sharp
+- Added HEIC/AVIF conversion in browser to close vulnerability gaps on compromised image uploads
+- Fixed build issues and tests from updated packages
+- Fixed a couple of bugs in stripe for dead code, and transaction history being broken
+- Fixed database resolver paths after new prisma update on bare metal
+- Added scripts for datetime conversation for all sqlite database migrating from prisma 6 -> prisma 7
+- Removed a duplicated call on the timeline that could error out in slow network conditions
+
 ## v1.6.5 - Small Fixes, Smoother Tracking, Hindi Support
 
 ### Changes
