@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { useLocalization } from '@/src/context/localization';
 import SetupWizard from '@/src/components/SetupWizard';
 import PageviewBeacon from '@/src/components/analytics/PageviewBeacon';
+import PageviewBeacon from '@/src/components/analytics/PageviewBeacon';
 import { STORAGE } from '@/constants';
 
 interface SetupStatusData {
